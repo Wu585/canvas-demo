@@ -13,31 +13,57 @@
     let canvas = document.getElementById("canvas");
     canvas.width = document.documentElement.clientWidth
     canvas.height = document.documentElement.clientHeight
-
+    
     let ctx = canvas.getContext("2d");
     ctx.fillStyle = "blue";
-    
+    ctx.lineWidth = 10;
+    ctx.lineCap = 'round';//线段末尾变圆
+    let last;//上一次
     let signal = false;
-    canvas.onmousedown=() =>{
-        signal = true
+    canvas.onmousedown=(e) =>{
+        signal = true;
+        last = [e.clientX,e.clientY];
     }
     canvas.onmouseup=() =>{
         signal = false
     }
-
-    canvas.onmousemove = (e)=>{
+    var isTouchDevice = 'ontouchstart' in document.documentElement;
+    console.log(isTouchDevice);
+    ctx.strokeStyle='none';
+    function drawLine(x1,y1,x2,y2){
+        ctx.beginPath();
+        ctx.moveTo(x1,y1);
+        ctx.lineTo(x2,y2);
+        ctx.stroke();
+    }
+     
+    if(isTouchDevice){
+        canvas.ontouchstart = (e)=>{
+            let  x = e.touches[0].clientX;
+            let  y = e.touches[0].clientY;
+            last = [x,y];
+        }
+        canvas.ontouchmove = (e)=>{
+            let  x = e.touches[0].clientX;
+            let  y = e.touches[0].clientY;
+            drawLine(last[0],last[1],x,y);
+            last = [x,y]; //实时更新
+        }
+    }else{
+        canvas.onmousemove = (e)=>{
         if(signal===true){
         // console.log(e.clientX)
         // console.log(e.clientY)
-        ctx.beginPath();
-        ctx.arc(e.clientX,e.clientY,10,0,2*Math.PI);
-        ctx.stroke();
-        ctx.fill();
+        drawLine(last[0],last[1],e.clientX,e.clientY);
+        last = [e.clientX,e.clientY]; //实时更新
         }
        else{
            console.log("nothing")
        }
     }
+    }
+ 
+
  </script>
 </body>
 </html>
